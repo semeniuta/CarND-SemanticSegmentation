@@ -1,5 +1,11 @@
 import tensorflow as tf
 
+def load_vgg_graph(sess, vgg_path):
+
+    tf.saved_model.loader.load(sess, ['vgg16'], vgg_path)
+    return tf.get_default_graph()
+
+    
 def load_vgg(sess, vgg_path):
     """
     Load Pretrained VGG Model into TensorFlow.
@@ -16,8 +22,7 @@ def load_vgg(sess, vgg_path):
     vgg_layer4_out_tensor_name = 'layer4_out:0'
     vgg_layer7_out_tensor_name = 'layer7_out:0'
     
-    tf.saved_model.loader.load(sess, ['vgg16'], vgg_path)
-    graph = tf.get_default_graph()
+    graph = load_vgg_graph(sess, vgg_path)
         
     names = (
         vgg_input_tensor_name, 
