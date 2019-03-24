@@ -85,8 +85,24 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-    # TODO: Implement function
-    return None, None, None
+    
+    logits = tf.reshape(nn_last_layer, (-1, num_classes), name='logits') 
+    
+    ce_loss = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(
+            labels=correct_label,
+            logits=logits
+        ), 
+        name='ce_loss'
+    )
+    
+    loss_op = tf.reduce_mean(ce_loss, name='loss_op')
+    
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    train_op = optimizer.minimize(loss_op, name='train_op')
+    
+    return logits, train_op, ce_loss
+
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
              correct_label, keep_prob, learning_rate):
