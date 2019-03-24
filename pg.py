@@ -18,6 +18,39 @@ get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/tra
 def get_small_batch(batch_size=2):
     gen = get_batches_fn(batch_size)
     return next(gen)
+
+
+def upsample_layer(t_out, num_classes, kernel_size, strides, l2_const=1e-3):
+    
+    t_upsample = tf.layers.conv2d_transpose(
+        t_out, 
+        num_classes, 
+        kernel_size, 
+        strides, 
+        padding='same', 
+        kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_const)
+    )
+    
+    return t_upsample
+
+
+def layers(t_out3, t_out4, t_out7, n_classes):
+    
+    t_up74 = upsample_layer(t_out7, num_classes=512, kernel_size=4, strides=2)
+    t_skip4 = tf.add(t_up74, t_out4)
+    
+    t_up43 = upsample_layer(t_up74, num_classes=256, kernel_size=4, strides=2)
+    t_skip3 = tf.add(t_up43, t_out3)
+    
+    t_last = upsample_layer(t_up43, num_classes=n_classes, kernel_size=16, strides=8)
+    
+    print('t_up74', t_up74)
+    print('t_skip4', t_skip4)
+    print('t_up43', t_up43)
+    print('t_skip3', t_skip3)
+    print('t_last', t_last)
+    
+    return t_last
     
     
 if __name__ == '__main__':
@@ -33,10 +66,14 @@ if __name__ == '__main__':
         
         #g = load_vgg_graph(sess, saved_model_dir)
         tensors = load_vgg(sess, saved_model_dir)
-        for t in tensors:
-            print(t)
+        
+        names = ('t_im', 't_keep', 't_out3', 't_out4', 't_out7')
+        for name, t in zip(names, tensors):
+            print(name, t)
         
         t_im, t_keep, t_out3, t_out4, t_out7 = tensors
+        
+        t_last = layers(t_out3, t_out4, t_out7, n_classes=2)
         
         fd = {
             t_im: small_batch_images,
@@ -45,9 +82,9 @@ if __name__ == '__main__':
         
         res = sess.run([t_im, t_out3, t_out4, t_out7], feed_dict=fd)
         
+        print('Shapes when fed with actual images:')
         for el in res:
             print(el.shape)
         
-                
         
     
