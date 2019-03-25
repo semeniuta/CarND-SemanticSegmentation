@@ -28,6 +28,7 @@ def run():
     num_classes = 2
     image_shape = (160, 576)  # KITTI dataset uses 160x576 images
     data_dir = '/data'
+    saved_model_dir = os.path.join(data_dir, 'vgg')
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
 
@@ -48,8 +49,35 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         # TODO: Build NN using load_vgg, layers, and optimize function
-
+        
+        tensors = load_vgg(sess, saved_model_dir)
+        t_im, t_keep, t_out3, t_out4, t_out7 = tensors
+        
+        t_last = layers(t_out3, t_out4, t_out7, n_classes=2)
+        
         # TODO: Train NN using the train_nn function
+        
+        epochs = 5
+        batch_size = 8
+        
+        t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
+        t_rate = tf.placeholder(tf.float32, (1,))
+        num_classes = 2
+        
+        logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
+        
+        train_nn(
+            sess,
+            epochs,
+            batch_size,
+            get_batches_fn,
+            train_op,
+            ce_loss,
+            t_im,
+            t_gt, 
+            t_keep, 
+            t_rate
+        )
 
         # TODO: Save inference data using helper.save_inference_samples
         #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)

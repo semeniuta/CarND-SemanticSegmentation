@@ -42,12 +42,15 @@ if __name__ == '__main__':
         
         t_last = layers(t_out3, t_out4, t_out7, n_classes=2)
         
+        t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
+        
         fd = {
             t_im: small_batch_images,
+            t_gt: small_batch_gt,
             t_keep: 0.5
         }
         
-        res = sess.run([t_im, t_out3, t_out4, t_out7], feed_dict=fd)
+        res = sess.run([t_im, t_gt, t_out3, t_out4, t_out7], feed_dict=fd)
         
         print('Shapes when fed with actual images:')
         for el in res:
