@@ -60,8 +60,8 @@ def run():
         epochs = 5
         batch_size = 8
         
-        t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
-        t_rate = tf.placeholder(tf.float32, ())
+        t_gt = tf.placeholder(tf.float32, (None, None, None, 2), name='ground_truth')
+        t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
         num_classes = 2
         
         logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
