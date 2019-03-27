@@ -61,7 +61,7 @@ def run():
         batch_size = 8
         
         t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
-        t_rate = tf.placeholder(tf.float32, (1,))
+        t_rate = tf.placeholder(tf.float32, ())
         num_classes = 2
         
         logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
@@ -80,7 +80,7 @@ def run():
             t_keep, 
             t_rate
         )
-
+        
         # TODO: Save inference data using helper.save_inference_samples
         #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
