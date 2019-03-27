@@ -28,6 +28,8 @@ if __name__ == '__main__':
     print('Number of images:', n_images)
     
     small_batch_images, small_batch_gt = get_small_batch()
+    
+    num_classes = 2
      
     with tf.Session() as sess:
         
@@ -40,21 +42,42 @@ if __name__ == '__main__':
         
         t_im, t_keep, t_out3, t_out4, t_out7 = tensors
         
-        t_last = layers(t_out3, t_out4, t_out7, n_classes=2)
+        t_last = layers(t_out3, t_out4, t_out7, n_classes=num_classes)
         
         t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
         
-        fd = {
-            t_im: small_batch_images,
-            t_gt: small_batch_gt,
-            t_keep: 0.5
-        }
+        t_logits = tf.reshape(t_last, (-1, num_classes), name='logits') 
+    
+        ce_loss = tf.nn.softmax_cross_entropy_with_logits(
+            labels=t_gt,
+            logits=t_logits,
+            name='ce_loss'
+        ) 
         
-        res = sess.run([t_im, t_gt, t_out3, t_out4, t_out7], feed_dict=fd)
+        loss_op = tf.reduce_mean(ce_loss, name='loss_op')
         
-        print('Shapes when fed with actual images:')
-        for el in res:
-            print(el.shape)
+        optimizer = tf.train.AdamOptimizer(learning_rate=1e-3)
+        train_op = optimizer.minimize(loss_op, name='train_op')
+        
+        for batch_im, batch_gt in get_batches_fn(2):
+        
+            fd = {
+                t_im: batch_im,
+                t_gt: batch_gt,
+                t_keep: 0.5
+            }
+
+            sess.run(tf.global_variables_initializer())
+
+            sess.run(train_op, feed_dict=fd)
+
+            res = sess.run([t_im, t_gt, t_out3, t_out4, t_out7, t_last, t_logits, ce_loss, loss_op], feed_dict=fd)
+
+            print('Shapes when fed with actual images:')
+            for el in res:
+                print(el.shape)
+
+            print(res[-1])
         
         
     
