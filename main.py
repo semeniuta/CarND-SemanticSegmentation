@@ -66,6 +66,8 @@ def run():
         
         logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
         
+        sess.run(tf.global_variables_initializer())
+        
         train_nn(
             sess,
             epochs,
