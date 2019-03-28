@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import os.path
+import os
 import tensorflow as tf
 import helper
 import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
 
-from functions import load_vgg, layers, optimize, train_nn
+from functions import load_vgg, layers, optimize, train_nn, save_model_sm
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -57,8 +57,10 @@ def run():
         
         # TODO: Train NN using the train_nn function
         
-        epochs = 5
-        batch_size = 8
+        hyper = {
+            'epochs': 3,
+            'batch_size': 10
+        }
         
         t_gt = tf.placeholder(tf.float32, (None, None, None, 2), name='ground_truth')
         t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
@@ -70,8 +72,8 @@ def run():
         
         train_nn(
             sess,
-            epochs,
-            batch_size,
+            hyper['epochs'],
+            hyper['batch_size'],
             get_batches_fn,
             train_op,
             ce_loss,
@@ -80,6 +82,8 @@ def run():
             t_keep, 
             t_rate
         )
+        
+        save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
         
         # TODO: Save inference data using helper.save_inference_samples
         #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
