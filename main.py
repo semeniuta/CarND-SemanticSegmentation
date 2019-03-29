@@ -59,12 +59,14 @@ def run():
         
         hyper = {
             'epochs': 3,
-            'batch_size': 10
+            'batch_size': 20,
+            'keep_prob': 0.7,
+            'learning_rate': 1e-3
         }
         
-        t_gt = tf.placeholder(tf.float32, (None, None, None, 2), name='ground_truth')
-        t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
         num_classes = 2
+        t_gt = tf.placeholder(tf.float32, (None, None, None, num_classes), name='ground_truth')
+        t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
         
         logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
         
@@ -80,13 +82,15 @@ def run():
             t_im,
             t_gt, 
             t_keep, 
-            t_rate
+            t_rate,
+            hyper['keep_prob'],
+            hyper['learning_rate'],
         )
         
-        save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
+        #save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
         
         # TODO: Save inference data using helper.save_inference_samples
-        #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, t_keep, t_im)
 
         # OPTIONAL: Apply the trained model to a video
 
