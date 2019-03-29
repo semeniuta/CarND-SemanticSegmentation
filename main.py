@@ -53,7 +53,7 @@ def run():
         tensors = load_vgg(sess, saved_model_dir)
         t_im, t_keep, t_out3, t_out4, t_out7 = tensors
         
-        t_last = layers(t_out3, t_out4, t_out7, n_classes=2)
+        t_last = layers(t_out3, t_out4, t_out7, n_classes=num_classes)
         
         # TODO: Train NN using the train_nn function
         
@@ -64,7 +64,6 @@ def run():
             'learning_rate': 1e-3
         }
         
-        num_classes = 2
         t_gt = tf.placeholder(tf.float32, (None, None, None, num_classes), name='ground_truth')
         t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
         
