@@ -1,10 +1,11 @@
 # Playground
 
 import os
+import sys
 import tensorflow as tf
 from glob import glob
 import helper
-from functions import load_vgg, load_vgg_graph, layers
+from functions import load_vgg, load_vgg_graph, layers, add_regularization
 
 data_dir = '/data'
 saved_model_dir = '/data/vgg/'
@@ -44,7 +45,7 @@ if __name__ == '__main__':
         
         t_last = layers(t_out3, t_out4, t_out7, n_classes=num_classes)
         
-        t_gt = tf.placeholder(tf.float32, (None, None, None, 2))
+        t_gt = tf.placeholder(tf.float32, (None, None, None, num_classes))
         
         t_logits = tf.reshape(t_last, (-1, num_classes), name='logits') 
     
@@ -56,8 +57,12 @@ if __name__ == '__main__':
         
         loss_op = tf.reduce_mean(ce_loss, name='loss_op')
         
+        new_loss = add_regularization(sess, loss_op, beta=1e-2)
+        
         optimizer = tf.train.AdamOptimizer(learning_rate=1e-3)
-        train_op = optimizer.minimize(loss_op, name='train_op')
+        train_op = optimizer.minimize(new_loss, name='train_op')
+        
+        #sys.exit(0)
         
         for batch_im, batch_gt in get_batches_fn(2):
         

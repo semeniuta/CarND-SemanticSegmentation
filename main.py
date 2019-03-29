@@ -6,7 +6,7 @@ import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
 
-from functions import load_vgg, layers, optimize, train_nn, save_model_sm
+from functions import load_vgg, layers, optimize, optimize_reg, train_nn, save_model_sm
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -58,16 +58,20 @@ def run():
         # TODO: Train NN using the train_nn function
         
         hyper = {
-            'epochs': 3,
+            'epochs': 10,
             'batch_size': 20,
-            'keep_prob': 0.7,
-            'learning_rate': 1e-3
+            'keep_prob': 0.5,
+            'learning_rate': 1e-3,
+            'reg_beta': 1e-2
         }
         
         t_gt = tf.placeholder(tf.float32, (None, None, None, num_classes), name='ground_truth')
         t_rate = tf.placeholder(tf.float32, (), name='learning_rate')
         
-        logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
+        #logits, train_op, ce_loss = optimize(t_last, t_gt, t_rate, num_classes)
+        logits, train_op, ce_loss = optimize_reg(
+            sess, t_last, t_gt, t_rate, num_classes, reg_beta=hyper['reg_beta']
+        )
         
         sess.run(tf.global_variables_initializer())
         

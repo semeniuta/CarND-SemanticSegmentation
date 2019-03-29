@@ -80,6 +80,23 @@ def layers(t_out3, t_out4, t_out7, n_classes):
     return t_last
 
 
+def add_regularization(sess, t_loss, beta, **kwargs):
+    
+    def wt(name):
+        t_name = '{}/kernel:0'.format(name)
+        return tf.get_default_graph().get_tensor_by_name(t_name) 
+    
+    ops = ['upsample74', 'upsample43', 'last']
+    weights = [wt(op) for op in ops]
+    w_losses = [tf.nn.l2_loss(w) for w in weights]
+    
+    reg = sum(w_losses)
+    
+    t_new_loss = tf.reduce_mean(t_loss + reg * beta, **kwargs)
+    
+    return t_new_loss
+        
+
 def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     """
     Build the TensorFLow loss and optimizer operations.
@@ -106,6 +123,26 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     train_op = optimizer.minimize(ce_loss, name='train_op')
     
     return logits, train_op, ce_loss
+
+
+def optimize_reg(sess, nn_last_layer, correct_label, learning_rate, num_classes, reg_beta=1e-2):
+    
+    logits = tf.reshape(nn_last_layer, (-1, num_classes), name='logits') 
+    
+    ce_loss = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(
+            labels=correct_label,
+            logits=logits,
+        ),
+        name='ce_loss'
+    )
+    
+    ce_loss_reg = add_regularization(sess, ce_loss, beta=reg_beta, name='ce_loss_reg')
+        
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    train_op = optimizer.minimize(ce_loss_reg, name='train_op')
+    
+    return logits, train_op, ce_loss_reg
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
