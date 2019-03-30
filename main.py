@@ -58,7 +58,7 @@ def run():
         # TODO: Train NN using the train_nn function
         
         hyper = {
-            'epochs': 10,
+            'epochs': 20,
             'batch_size': 20,
             'keep_prob': 0.5,
             'learning_rate': 1e-3,
@@ -90,10 +90,10 @@ def run():
             hyper['learning_rate'],
         )
         
-        #save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
-        
         # TODO: Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, t_keep, t_im)
+        
+        save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
 
         # OPTIONAL: Apply the trained model to a video
 
