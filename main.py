@@ -46,16 +46,16 @@ def run():
         get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/training'), image_shape)
 
         # OPTIONAL: Augment Images for better results
-        #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
+        # https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
-        # TODO: Build NN using load_vgg, layers, and optimize function
+        # Build NN using load_vgg, layers, and optimize function
         
         tensors = load_vgg(sess, saved_model_dir)
         t_im, t_keep, t_out3, t_out4, t_out7 = tensors
         
         t_last = layers(t_out3, t_out4, t_out7, n_classes=num_classes)
         
-        # TODO: Train NN using the train_nn function
+        # Train NN using the train_nn function
         
         hyper = {
             'epochs': 20,
@@ -90,7 +90,7 @@ def run():
             hyper['learning_rate'],
         )
         
-        # TODO: Save inference data using helper.save_inference_samples
+        # Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, t_keep, t_im)
         
         save_model_sm(sess, 'savedmodel', hyper, t_im, t_gt, t_keep, logits, ce_loss)
